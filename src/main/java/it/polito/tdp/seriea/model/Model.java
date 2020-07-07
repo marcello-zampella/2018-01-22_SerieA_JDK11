@@ -3,6 +3,7 @@ package it.polito.tdp.seriea.model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -19,7 +20,6 @@ public class Model {
 	
 	public Model() {
 		dao= new SerieADAO();
-		grafo=new SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
 	}
 
@@ -29,12 +29,12 @@ public class Model {
 	}
 	
 	private LinkedList<Integer> anni;
-	private HashMap<Integer, Integer> risultati;
+	private TreeMap<Integer, Integer> risultati;
 
-	public HashMap<Integer, Integer> getPuntiStagioni(Team t) {
+	public TreeMap<Integer, Integer> getPuntiStagioni(Team t) {
 		ArrayList<Match>partite=dao.getPuntiTotali(t);
 		System.out.println(partite);
-		risultati= new HashMap<Integer, Integer>();
+		risultati= new TreeMap<Integer, Integer>();
 		anni= dao.getAnni(t);
 		for (int i=0;i<anni.size();i++) {
 			risultati.put(anni.get(i), 0);
@@ -53,6 +53,7 @@ public class Model {
 	}
 
 	public Vincente getAnnata(Team squadra) {
+		grafo=new SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 		Graphs.addAllVertices(grafo, anni);
 		for(Integer a1: anni){
 			for(Integer a2: anni) {
@@ -86,7 +87,7 @@ public class Model {
 			}
 			int totale= entranti-uscenti;
 			mappa.put(a, totale);
-			if(totale>max) {
+			if(totale>=max) {
 				annoVincente=a;
 				max=totale;
 			}
@@ -94,6 +95,65 @@ public class Model {
 		
 		return new Vincente(annoVincente,max);
 		
+	}
+	
+	int max;
+	LinkedList<Integer> cammino;
+	LinkedList<Integer> massimo;
+
+	public LinkedList<Integer> getCamminoVirtuoso(Team value) {
+		int livello=0; //livello e' quanto sto scendendo nella lista
+		int fine=2017;
+		cammino=new LinkedList<Integer>();
+		massimo=new LinkedList<Integer>();
+		max=0;
+		espandi(livello, anni.get(0),fine);
+		return massimo;
+		
+	}
+
+	private void espandi(int livello, Integer anno, int fine) { //anno sarebbe l'anno in questione
+			this.cammino.add(anno);
+			System.out.println(anno);
+		if(anno>=fine) {	//condizione di terminazione, termina tutto
+			termina(cammino);
+			return;
+
+		}
+		boolean flag=true;
+		int k=0;
+		DefaultWeightedEdge arco = null;
+		while(flag) {
+			k++;
+			if(anno+k>fine) {
+				anno+=k;
+				termina(cammino);
+				return;
+			}
+			arco=grafo.getEdge(anno, anno+k);
+			if(this.anni.contains(anno+k)) //non considero caso anno inesistente
+				flag=false;
+		}
+		anno+=k;
+		if(arco!=null) {
+			espandi(livello+1, anno,fine);
+		} else {
+			termina(cammino); //termina la lista, ma si puo continuare
+			cammino.clear();
+			espandi(0,anno,fine);
+		}
+		
+	}
+
+	private void termina(LinkedList<Integer> camm) {
+		if(camm.size()>=massimo.size()) {
+			massimo=new LinkedList<Integer>(cammino);
+		}
+		
+	}
+	
+	public int punteggioAnno (int anno) {
+		return risultati.get(anno);
 	}
 
 }
