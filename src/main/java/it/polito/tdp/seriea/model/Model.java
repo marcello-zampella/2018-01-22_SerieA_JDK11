@@ -57,13 +57,15 @@ public class Model {
 		Graphs.addAllVertices(grafo, anni);
 		for(Integer a1: anni){
 			for(Integer a2: anni) {
+				if( !(a1==a2 || grafo.containsEdge(a1, a2) || grafo.containsEdge(a2,a1))) {
 				int risultato1= risultati.get(a1);
 				int risultato2= risultati.get(a2);
 				if(risultato1<risultato2) {
-					Graphs.addEdge(grafo, a1, a2, (a2-a1));
+					Graphs.addEdge(grafo, a1, a2, risultato2-risultato1);
 				}
-				if(risultato2<risultato1) {
-					Graphs.addEdge(grafo, a2, a1, (a1-a2));
+				if(risultato1>risultato2) {
+					Graphs.addEdge(grafo, a2, a1, risultato1-risultato2);
+				}
 				}
 			}
 		}
