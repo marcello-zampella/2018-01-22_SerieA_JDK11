@@ -1,9 +1,12 @@
 package it.polito.tdp.seriea;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.seriea.model.Model;
+import it.polito.tdp.seriea.model.Team;
+import it.polito.tdp.seriea.model.Vincente;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -21,7 +24,7 @@ public class FXMLController {
     private URL location;
 
     @FXML
-    private ChoiceBox<?> boxSquadra;
+    private ChoiceBox<Team> boxSquadra;
 
     @FXML
     private Button btnSelezionaSquadra;
@@ -37,11 +40,19 @@ public class FXMLController {
 
     @FXML
     void doSelezionaSquadra(ActionEvent event) {
+    	Team t=this.boxSquadra.getValue();
+    	HashMap<Integer, Integer> lista=model.getPuntiStagioni(t);
+    	this.txtResult.clear();
+    	for (int i : lista.keySet()) {
+			this.txtResult.appendText("Stagione "+i+" punti totali "+lista.get(i)+"\n");
+		}
 
     }
 
     @FXML
     void doTrovaAnnataOro(ActionEvent event) {
+    	Vincente v=this.model.getAnnata(this.boxSquadra.getValue());
+    	this.txtResult.appendText("L'annata vincente della squadra: anno "+v.getAnno()+" punti "+v.getPunti());
 
     }
 
@@ -57,10 +68,13 @@ public class FXMLController {
         assert btnTrovaAnnataOro != null : "fx:id=\"btnTrovaAnnataOro\" was not injected: check your FXML file 'SerieA.fxml'.";
         assert btnTrovaCamminoVirtuoso != null : "fx:id=\"btnTrovaCamminoVirtuoso\" was not injected: check your FXML file 'SerieA.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'SerieA.fxml'.";
+        this.boxSquadra.getItems().clear();
+        
 
     }
 
 	public void setModel(Model model) {
 		this.model = model;
+		this.boxSquadra.getItems().addAll(model.getAllSquadre());
 	}
 }
